@@ -25,6 +25,7 @@ Then change dir into aparapi-m1
 ```
 cd aparapi-m1
 ```
+
 Clone the four aparapi repos from Syncleus
 ```
 git clone https://github.com/Syncleus/aparapi.git
@@ -33,7 +34,7 @@ git clone https://github.com/Syncleus/aparapi-native.git
 git clone https://github.com/Syncleus/aparapi-examples.git
 ```
 
-Now we copy our patched patch the NativeLoader over the one in aparapi-jni
+Now we copy our patched NativeLoader.java over the one in aparapi-jni
 
 ```
 cp NativeLoader.java.patched aparapi-jni/src/main/java/com/aparapi/natives/NativeLoader.java
