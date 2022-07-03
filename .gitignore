@@ -1,0 +1,6 @@
+build/
+aparapi/
+aparapi-native/
+aparapi-jni/
+aparapi-examples/
+
