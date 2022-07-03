@@ -1,16 +1,20 @@
-Before you start I suggest updating XCode to 14.  That will match what I used to build. 
+Before you start I suggest updating XCode amnd ensuring you have command line tools installed
 
-Also I am using cmake to build so you will need cmake 
+We will need
+```
+   cmake
+   clinfo 
+   git
+```
 
-Plus clinfo is useful ;) so we will install it
-
-Assuming you have brew 
+Assuming you have brew installed 
 ```
 brew install clinfo
 brew install cmake
+brew install git
 ```
 
-Clone this repo into aparapi-m1
+Clone this repo into aparapi-m1 using git
 
 ```
 $ git clone https://github.com/grfrost/aparapi-m1.git
