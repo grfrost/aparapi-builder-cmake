@@ -1,15 +1,27 @@
-After you clone this repo into aparapi-m1
+Clone this repo into aparapi-m1
 
-git clone https://github.com/grfrost/aparapi-m1.git
+```
+$ git clone https://github.com/grfrost/aparapi-m1.git
+```
 
+Then change dir into aparapi-m1
+
+```
 cd aparapi-m1
-
+```
+Clone the four aparapi repos from Syncleus
+```
 git clone https://github.com/Syncleus/aparapi.git
 git clone https://github.com/Syncleus/aparapi-jni.git
 git clone https://github.com/Syncleus/aparapi-native.git
 git clone https://github.com/Syncleus/aparapi-examples.git
+```
 
+Now we copy our patched patch the NativeLoader over the one in aparapi-jni
+
+```
 cp NativeLoader.java.patched aparapi-jni/src/main/java/com/aparapi/natives/NativeLoader.java
+```
 
 The above patch contains the code for Aparapi to load the aarch64 dynamic library
 ```
@@ -32,15 +44,30 @@ index b26918f..23b6ff4 100644
                  {"/win/libgcc_s_seh_x86_64.dll", "libgcc_s_seh-1.dll"},
 ```
 
+Now we can create our build dir and go into it
+ 
+```
 mkdir build
-
 cd build
+```
 
-cmake .. 
+Use cmake to prep the build
+```
+cmake ..
+```
 
+If cmake complains you need to fix the issues. It worked for me with a brand new M1 box after installing XCode 
+
+Lets build from parent
+```
 cd ..
+cmake --build build --target javac --target jar
+```
 
-cmake --build 
+You might see some clang warnings. 
 
+You can test with 
 
-
+```
+cmake --build build --target javac --target jar --target mandel
+```
