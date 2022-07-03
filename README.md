@@ -1,3 +1,15 @@
+Before you start I suggest updating XCode to 14.  That will match what I used to build. 
+
+Also I am using cmake to build so you will need cmake 
+
+Plus clinfo is useful ;) so we will install it
+
+Assuming you have brew 
+```
+brew install clinfo
+brew install cmake
+```
+
 Clone this repo into aparapi-m1
 
 ```
