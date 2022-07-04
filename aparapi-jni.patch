@@ -1,0 +1,17 @@
+diff --git a/src/main/java/com/aparapi/natives/NativeLoader.java b/src/main/java/com/aparapi/natives/NativeLoader.java
+index b26918f..23b6ff4 100644
+--- a/src/main/java/com/aparapi/natives/NativeLoader.java
++++ b/src/main/java/com/aparapi/natives/NativeLoader.java
+@@ -54,7 +54,11 @@ public class NativeLoader {
+                     NativeUtils.loadLibraryFromJar("/linux/libaparapi_x86.so", "libaparapi.so");
+             }
+         } else if( isMac() && is64Bit() ) {
+-            NativeUtils.loadLibraryFromJar("/osx/libaparapi_x86_64.dylib", "libaparapi.dylib");
++		if ( isArm() ){
++                    NativeUtils.loadLibraryFromJar("/osx/libaparapi_aarch64.dylib", "libaparapi.dylib");
++		}else{
++                    NativeUtils.loadLibraryFromJar("/osx/libaparapi_x86_64.dylib", "libaparapi.dylib");
++		}
+         } else if( isWindows() && is64Bit() ) {
+             String[][] librariesAndJars = new String[][] {
+                 {"/win/libgcc_s_seh_x86_64.dll", "libgcc_s_seh-1.dll"},

@@ -1,4 +1,5 @@
 build/
+cmake-build-debug
 aparapi/
 aparapi-native/
 aparapi-jni/
