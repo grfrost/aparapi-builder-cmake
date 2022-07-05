@@ -6,11 +6,17 @@ if (APPLE)
    set(JAVA_HOME /Users/grfrost/java/jdk-18.0.1.1.jdk/Contents/Home)
    set(JNI_SUBDIR darwin)
    set(OpenCL_FRAMEWORK "-framework OpenCL")
+   set(LIBSUFFIX dylib)
+   set(ARCH aarch64)
+   set(PLAT osx)
 endif ()
 if (UNIX AND NOT APPLE)
    set(JAVA_HOME /usr/lib/jvm/jdk-18)
    set(JNI_SUBDIR linux)
    set(OpenCL_FRAMEWORK "OpenCL")
+   set(LIBSUFFIX so)
+   set(ARCH x86_64)
+   set(PLAT linux)
 endif ()
 
 find_package(OpenCL REQUIRED)
@@ -22,17 +28,19 @@ include_directories(${OPENCL_INCLUDE_DIR})
 
 file(GLOB_RECURSE JAVA_APARAPI_SRC 
 	"${CMAKE_CURRENT_SOURCE_DIR}/aparapi/src/main/*.java"
-        "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-jni/src/main/*.java"
+   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-jni/src/main/*.java"
 	"${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/mandel/*.java"
-        "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
+   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
+   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/info/*.java"
+   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/squares/*.java"
 )
 
 file(GLOB_RECURSE CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/*.cpp")
 list(REMOVE_ITEM CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/classtoolstest.cpp")
 list(REMOVE_ITEM CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/cltest.cpp")
 
-set(THIRDPARTY ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/junit-4.13.2.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asm6-6.0_BETA.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/hamcrest-2.2.jar)
-set(OTHIRDPARTY ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/junit-4.13.2.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/asm6-6.0_BETA.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/hamcrest-2.2.jar)
+set(BCEL_JAR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar)
+set(APARAPI_JAR ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar)
 
 add_custom_target(javac
    COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes
@@ -43,30 +51,40 @@ add_custom_target(javac
    -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi/src/main 
    -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-jni/src/main 
    -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main 
-   -classpath ${THIRDPARTY}
+   -classpath ${BCEL_JAR}
    ${JAVA_APARAPI_SRC}
 )
 
 add_custom_target(life 
-	COMMAND ${JAVA_HOME}/bin/java -classpath ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar com.aparapi.examples.life.Main
-   DEPENDS javac aparapi_aarch64 jar
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.life.Main
+   DEPENDS javac aparapi_${ARCH} jar
 )
 
 add_custom_target(mandel 
-   COMMAND ${JAVA_HOME}/bin/java -classpath ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar com.aparapi.examples.mandel.Main
-   DEPENDS javac aparapi_aarch64 jar
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.mandel.Main
+   DEPENDS javac aparapi_${ARCH} jar
 )
 
+add_custom_target(squares 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.squares.Main
+   DEPENDS javac aparapi_${ARCH} jar
+   )
+
+add_custom_target(info 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.info.Main
+   DEPENDS javac aparapi_${ARCH} jar
+   )
+
 add_custom_target(jar
-   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes/osx
-   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/libaparapi_aarch64.dylib  ${CMAKE_CURRENT_BINARY_DIR}/classes/osx
+   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes/${PLAT}
+   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/libaparapi_${ARCH}.${LIBSUFFIX}  ${CMAKE_CURRENT_BINARY_DIR}/classes/${PLAT}
    COMMAND ${JAVA_HOME}/bin/jar
    --create 
-   --file ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar
+   --file ${APARAPI_JAR}
    --no-manifest
    -C ${CMAKE_CURRENT_BINARY_DIR}/classes/ com 
-   -C ${CMAKE_CURRENT_BINARY_DIR}/classes/ osx
-   DEPENDS javac aparapi_aarch64
+   -C ${CMAKE_CURRENT_BINARY_DIR}/classes/ ${PLAT}
+   DEPENDS javac aparapi_${ARCH}
 )
 
 add_custom_target(squeaky
@@ -84,8 +102,8 @@ include_directories(
    ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/invoke
 )
 
-add_library(aparapi_aarch64 SHARED
+add_library(aparapi_${ARCH} SHARED
    ${CPP_SRC}
 )
 
-target_link_libraries(aparapi_aarch64 ${JNI_LIBRARIES} ${OpenCL_FRAMEWORK})
+target_link_libraries(aparapi_${ARCH} ${JNI_LIBRARIES} ${OpenCL_FRAMEWORK})
