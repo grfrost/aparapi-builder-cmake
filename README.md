@@ -1,4 +1,4 @@
-Before you start I suggest updating XCode amnd ensuring you have command line tools installed
+On Mac OSX I suggest updating XCode and ensuring you have clang command line tools installed
 
 We will need
 ```
@@ -37,6 +37,15 @@ Then change dir into aparapi-builder-cmake
 ```
 cd aparapi-builder-cmake
 ```
+
+If you are lucky (tested on linux and Apple OSX M1) you might just need to run the bootstrap-one-time.sh script 
+
+```
+$ bash ./bootstrap-one-time.sh 
+```
+Then you are done ;) 
+
+If not, here are the steps the bootstrap-one-time.sh script is attempting ;)   
 
 Clone the four aparapi repos from Syncleus
 ```
