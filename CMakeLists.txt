@@ -23,21 +23,22 @@ find_package(OpenCL REQUIRED)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CXXFLAGS "-g")
+set(SYNCLEUS "${CMAKE_CURRENT_SOURCE_DIR}/syncleus")
 
 include_directories(${OPENCL_INCLUDE_DIR})
 
 file(GLOB_RECURSE JAVA_APARAPI_SRC 
-	"${CMAKE_CURRENT_SOURCE_DIR}/aparapi/src/main/*.java"
-   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-jni/src/main/*.java"
-	"${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/mandel/*.java"
-   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
-   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/info/*.java"
-   "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main/java/com/aparapi/examples/squares/*.java"
+	"${SYNCLEUS}/aprapi/src/main/*.java"
+	"${SYNCLEUS}/aparapi-jni/src/main/*.java"
+	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/mandel/*.java"
+	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
+	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/info/*.java"
+	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/squares/*.java"
 )
 
-file(GLOB_RECURSE CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/*.cpp")
-list(REMOVE_ITEM CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/classtoolstest.cpp")
-list(REMOVE_ITEM CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/cltest.cpp")
+file(GLOB_RECURSE CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/*.cpp")
+list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/classtoolstest.cpp")
+list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/cltest.cpp")
 
 set(BCEL_JAR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar)
 set(APARAPI_JAR ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar)
@@ -48,9 +49,9 @@ add_custom_target(javac
    COMMAND ${JAVA_HOME}/bin/javac  --source 11 -g
    -h ${CMAKE_CURRENT_BINARY_DIR}/include
    -d ${CMAKE_CURRENT_BINARY_DIR}/classes
-   -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi/src/main 
-   -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-jni/src/main 
-   -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-examples/src/main 
+   -sourcepath ${SYNCLEUS}/aparapi/src/main 
+   -sourcepath ${SYNCLEUS}/aparapi-jni/src/main 
+   -sourcepath ${SYNCLEUS}/aparapi-examples/src/main 
    -classpath ${BCEL_JAR}
    ${JAVA_APARAPI_SRC}
 )
