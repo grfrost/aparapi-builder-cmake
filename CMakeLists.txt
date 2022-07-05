@@ -42,10 +42,10 @@ list(REMOVE_ITEM CPP_SRC "${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/clt
 set(BCEL_JAR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar)
 set(APARAPI_JAR ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar)
 
-add_custom_target(javac
+add_custom_target(javac 
    COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes
    COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/include
-   COMMAND ${JAVA_HOME}/bin/javac  --source 11
+   COMMAND ${JAVA_HOME}/bin/javac  --source 11 -g
    -h ${CMAKE_CURRENT_BINARY_DIR}/include
    -d ${CMAKE_CURRENT_BINARY_DIR}/classes
    -sourcepath ${CMAKE_CURRENT_SOURCE_DIR}/aparapi/src/main 
