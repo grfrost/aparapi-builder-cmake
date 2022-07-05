@@ -82,6 +82,28 @@ index b26918f..23b6ff4 100644
                  {"/win/libgcc_s_seh_x86_64.dll", "libgcc_s_seh-1.dll"},
 ```
 
+We also should apply this patch which crashes on linux (not on Apple curiously)
+
+```
+cp JNIExceptions.h.patched aparapi-native/src/cpp/JNIExceptions.h
+```
+
+The content is here, note that the original code had an extra %s in the printf ;)
+```
+diff --git a/src/cpp/JNIExceptions.h b/src/cpp/JNIExceptions.h
+index bcb44a0..3ff72f3 100644
+--- a/src/cpp/JNIExceptions.h
++++ b/src/cpp/JNIExceptions.h
+@@ -51,7 +51,7 @@ public:
+ 
+    void printError() {
+       if(_message != "") {
+-         fprintf(stderr, "!!!!!!! %s failed %s\n", message());
++         fprintf(stderr, "!!!!!!! failed %s\n", _message.c_str());^M
+       }
+    }
+
+```
 Now we can create our build dir and go into it
  
 ```
