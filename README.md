@@ -2,28 +2,40 @@ Before you start I suggest updating XCode amnd ensuring you have command line to
 
 We will need
 ```
-   cmake
-   clinfo 
+   cmake 
    git
 ```
 
-Assuming you have brew installed 
+You might also want
+```
+   clinfo
+```
+
+On Mac X64 and M1 assuming you have brew installed 
 ```
 brew install clinfo
 brew install cmake
 brew install git
 ```
 
-Clone this repo into aparapi-m1 using git
+On linux
 
 ```
-$ git clone https://github.com/grfrost/aparapi-m1.git
+sudo apt-get install clinfo
+sudo apt-get install cmake
+sudo aptget install git
 ```
 
-Then change dir into aparapi-m1
+Clone this repo into aparapi-builder-cmake using git
 
 ```
-cd aparapi-m1
+$ git clone https://github.com/grfrost/aparapi-builder-cmake.git
+```
+
+Then change dir into aparapi-builder-cmake
+
+```
+cd aparapi-builder-cmake
 ```
 
 Clone the four aparapi repos from Syncleus
@@ -34,7 +46,7 @@ git clone https://github.com/Syncleus/aparapi-native.git
 git clone https://github.com/Syncleus/aparapi-examples.git
 ```
 
-Now we copy our patched NativeLoader.java over the one in aparapi-jni
+For Mac M1 we copy our patched NativeLoader.java over the one in aparapi-jni
 
 ```
 cp NativeLoader.java.patched aparapi-jni/src/main/java/com/aparapi/natives/NativeLoader.java
@@ -73,7 +85,7 @@ Use cmake to prep the build
 cmake ..
 ```
 
-If cmake complains you need to fix the issues. It worked for me with a brand new M1 box after installing XCode 
+If cmake complains you need to fix the issues. It worked for me :) with a brand new M1 box after installing XCode 
 
 Lets build from parent
 ```
