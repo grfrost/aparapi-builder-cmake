@@ -7,7 +7,17 @@ if (APPLE)
    set(JNI_SUBDIR darwin)
    set(OpenCL_FRAMEWORK "-framework OpenCL")
    set(LIBSUFFIX dylib)
-   set(ARCH aarch64)
+   execute_process(
+      COMMAND uname -m
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE OSX_ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+   )
+   if (OSX_ARCH STREQUAL "arm64")
+      set(ARCH aarch64)
+   else()
+      set(ARCH x86_64)
+   endif()
    set(PLAT osx)
 endif ()
 if (UNIX AND NOT APPLE)
@@ -18,6 +28,12 @@ if (UNIX AND NOT APPLE)
    set(ARCH x86_64)
    set(PLAT linux)
 endif ()
+
+message("JAVA_HOME=${JAVA_HOME}")
+message("JNI_SUBDIR=${JNI_SUBDIR}")
+message("LIBSUFFIX=${LIBSUFFIX}")
+message("ARCH=${ARCH}")
+message("PLAT=${PLAT}")
 
 find_package(OpenCL REQUIRED)
 include_directories(${OPENCL_INCLUDE_DIR})
