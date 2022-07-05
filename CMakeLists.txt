@@ -20,38 +20,41 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 find_package(OpenCL REQUIRED)
+include_directories(${OPENCL_INCLUDE_DIR})
 
 set(CMAKE_CXX_STANDARD 14)
 set(CXXFLAGS "-g")
-set(SYNCLEUS "${CMAKE_CURRENT_SOURCE_DIR}/syncleus")
 
-include_directories(${OPENCL_INCLUDE_DIR})
+set(SYNCLEUS "${CMAKE_CURRENT_SOURCE_DIR}/syncleus")
+set(CLASSES "${CMAKE_CURRENT_BINARY_DIR}/classes")
+set(BCEL_JAR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar)
+set(APARAPI_JAR ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar)
+set(GENERATED_INCLUDE  ${CMAKE_CURRENT_BINARY_DIR}/include)
+
 
 file(GLOB_RECURSE JAVA_APARAPI_SRC 
-	"${SYNCLEUS}/aprapi/src/main/*.java"
-	"${SYNCLEUS}/aparapi-jni/src/main/*.java"
-	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/mandel/*.java"
-	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
-	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/info/*.java"
-	"${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/squares/*.java"
+   "${SYNCLEUS}/aparapi/src/main/*.java"
+   "${SYNCLEUS}/aparapi-jni/src/main/*.java"
+   "${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/mandel/*.java"
+   "${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/life/*.java"
+   "${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/info/*.java"
+   "${SYNCLEUS}/aparapi-examples/src/main/java/com/aparapi/examples/squares/*.java"
 )
 
 file(GLOB_RECURSE CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/*.cpp")
 list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/classtoolstest.cpp")
 list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/cltest.cpp")
 
-set(BCEL_JAR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/bcel-6.5.0.jar)
-set(APARAPI_JAR ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar)
 
 add_custom_target(javac 
-   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes
-   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/include
+   COMMAND mkdir -p ${GENERATED_INCLUDE}
+   COMMAND mkdir -p ${CLASSES}
    COMMAND ${JAVA_HOME}/bin/javac  --source 11 -g
-   -h ${CMAKE_CURRENT_BINARY_DIR}/include
-   -d ${CMAKE_CURRENT_BINARY_DIR}/classes
-   -sourcepath ${SYNCLEUS}/aparapi/src/main 
-   -sourcepath ${SYNCLEUS}/aparapi-jni/src/main 
-   -sourcepath ${SYNCLEUS}/aparapi-examples/src/main 
+   -h ${GENERATED_INCLUDE}
+   -d ${CLASSES}
+   -sourcepath "${SYNCLEUS}/aparapi/src/main" 
+   -sourcepath "${SYNCLEUS}/aparapi-jni/src/main" 
+   -sourcepath "${SYNCLEUS}/aparapi-examples/src/main" 
    -classpath ${BCEL_JAR}
    ${JAVA_APARAPI_SRC}
 )
@@ -77,30 +80,28 @@ add_custom_target(info
    )
 
 add_custom_target(jar
-   COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/classes/${PLAT}
-   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/libaparapi_${ARCH}.${LIBSUFFIX}  ${CMAKE_CURRENT_BINARY_DIR}/classes/${PLAT}
+   COMMAND mkdir -p ${CLASSES}/${PLAT}
+   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/libaparapi_${ARCH}.${LIBSUFFIX}  ${CLASSES}/${PLAT}
    COMMAND ${JAVA_HOME}/bin/jar
    --create 
    --file ${APARAPI_JAR}
    --no-manifest
-   -C ${CMAKE_CURRENT_BINARY_DIR}/classes/ com 
-   -C ${CMAKE_CURRENT_BINARY_DIR}/classes/ ${PLAT}
+   -C ${CLASSES}/ com 
+   -C ${CLASSES}/ ${PLAT}
    DEPENDS javac aparapi_${ARCH}
 )
 
 add_custom_target(squeaky
-   COMMAND rm -f ${CMAKE_CURRENT_BINARY_DIR}/aparapi.jar
-   COMMAND rm -rf ${CMAKE_CURRENT_BINARY_DIR}/classes
-   COMMAND rm -rf ${CMAKE_CURRENT_BINARY_DIR}/include
+   COMMAND rm -rf ${APARAPI_JAR} ${CLASSSES} ${GENERATED_INCLUDE}
 )
 
 include_directories(
    ${JAVA_HOME}/include
    ${JAVA_HOME}/include/${JNI_SUBDIR}
-   ${CMAKE_CURRENT_BINARY_DIR}/include
-   ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/runKernel
-   ${CMAKE_CURRENT_SOURCE_DIR}/aparapi-native/src/cpp/invoke
+   ${GENERATED_INCLUDE}
+   ${SYNCLEUS}/aparapi-native/src/cpp
+   ${SYNCLEUS}/aparapi-native/src/cpp/runKernel
+   ${SYNCLEUS}/aparapi-native/src/cpp/invoke
 )
 
 add_library(aparapi_${ARCH} SHARED
