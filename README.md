@@ -49,16 +49,20 @@ If not, here are the steps the bootstrap-one-time.sh script is attempting ;)
 
 Clone the four aparapi repos from Syncleus
 ```
+cd syncleus
 git clone https://github.com/Syncleus/aparapi.git
 git clone https://github.com/Syncleus/aparapi-jni.git
 git clone https://github.com/Syncleus/aparapi-native.git
 git clone https://github.com/Syncleus/aparapi-examples.git
+cd .. 
 ```
 
 For Mac M1 we copy our patched NativeLoader.java over the one in aparapi-jni
 
 ```
+cd syncleus
 cp NativeLoader.java.patched aparapi-jni/src/main/java/com/aparapi/natives/NativeLoader.java
+cd ..
 ```
 
 The above patch contains the code for Aparapi to load the aarch64 dynamic library
@@ -85,7 +89,9 @@ index b26918f..23b6ff4 100644
 We also should apply this patch which crashes on linux (not on Apple curiously)
 
 ```
+cd syncleus
 cp JNIExceptions.h.patched aparapi-native/src/cpp/JNIExceptions.h
+cd ..
 ```
 
 The content is here, note that the original code had an extra %s in the printf ;)
