@@ -31,8 +31,12 @@ if (APPLE)
    set(PLAT osx)
 endif ()
 if (UNIX AND NOT APPLE)
-   if (EXISTS /usr/lib/jvm/jdk-18)
-      set(JAVA_HOME /usr/lib/jvm/jdk-18)
+   if (EXISTS /home/gfrost/github/TornadoVM/etc/dependencies/TornadoVM-OpenJDK17/jdk-17.0.1)
+      set(JAVA_HOME /home/gfrost/github/TornadoVM/etc/dependencies/TornadoVM-OpenJDK17/jdk-17.0.1)
+   elseif(EXISTS /usr/lib/jvm/jdk-18)
+     set(JAVA_HOME /usr/lib/jvm/jdk-18)
+   elseif (EXISTS /home/gfrost/tornadovm/safe/openjdk1.8.0_262-jvmci-20.2-b03)
+      set(JAVA_HOME /home/gfrost/tornadovm/safe/openjdk1.8.0_262-jvmci-20.2-b03)
    else()
        message("--------------")
        message("NO JAVA_HOME")
@@ -80,7 +84,7 @@ list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/cltest.cpp")
 add_custom_target(javac 
    COMMAND mkdir -p ${GENERATED_INCLUDE}
    COMMAND mkdir -p ${CLASSES}
-   COMMAND ${JAVA_HOME}/bin/javac  --source 11 -g
+   COMMAND ${JAVA_HOME}/bin/javac  -g
    -h ${GENERATED_INCLUDE}
    -d ${CLASSES}
    -sourcepath "${SYNCLEUS}/aparapi/src/main" 
