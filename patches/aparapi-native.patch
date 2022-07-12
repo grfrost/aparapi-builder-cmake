@@ -1,0 +1,160 @@
+diff --git a/src/cpp/JNIExceptions.h b/src/cpp/JNIExceptions.h
+index bcb44a0..e59cdf0 100644
+--- a/src/cpp/JNIExceptions.h
++++ b/src/cpp/JNIExceptions.h
+@@ -1,68 +1,68 @@
+-/**
+- * Copyright (c) 2016 - 2018 Syncleus, Inc.
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-#include <jni.h>
+-#include <string> 
+-#include <stdio.h>
+-#include <exception>
+-#include "CLHelper.h"
+- 
+-#ifndef JNI_EXCEPTIONS_H
+-#define JNI_EXCEPTIONS_H
+-
+-class JNIException : public std::exception {
+-
+-private:
+-   std::string _message;
+-
+-public:
+-
+-   ~JNIException() throw () {
+-   }
+-
+-   JNIException(std::string message) {      
+-      _message = message;
+-   }
+-
+-   JNIException(const JNIException& cle) {
+-      _message = cle._message;
+-   }
+-
+-   JNIException& operator=(const JNIException& cle) {
+-      _message = cle._message;
+-      return *this;
+-   }
+-
+-   const char* message() {
+-      return _message.c_str();
+-   }
+-
+-   void printError() {
+-      if(_message != "") {
+-         fprintf(stderr, "!!!!!!! %s failed %s\n", message());
+-      }
+-   }
+-
+-   const char* what() {
+-       return std::string("!!!!!!! " + _message + " failed\n").c_str();
+-   }
+-};
+-
+-
+-jint throwAparapiJNIRuntimeException( JNIEnv *env, std::string message );
+-
+-jint throwAparapiJNIRuntimeException( JNIEnv *env, const char *message );
+-
+-#endif // JNI_EXCEPTIONS_H
++/**
++ * Copyright (c) 2016 - 2018 Syncleus, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++#include <jni.h>
++#include <string> 
++#include <stdio.h>
++#include <exception>
++#include "CLHelper.h"
++ 
++#ifndef JNI_EXCEPTIONS_H
++#define JNI_EXCEPTIONS_H
++
++class JNIException : public std::exception {
++
++private:
++   std::string _message;
++
++public:
++
++   ~JNIException() throw () {
++   }
++
++   JNIException(std::string message) {      
++      _message = message;
++   }
++
++   JNIException(const JNIException& cle) {
++      _message = cle._message;
++   }
++
++   JNIException& operator=(const JNIException& cle) {
++      _message = cle._message;
++      return *this;
++   }
++
++   const char* message() {
++      return _message.c_str();
++   }
++
++   void printError() {
++      if(_message != "") {
++         fprintf(stderr, "!!!!!!! failed %s\n", _message.c_str());
++      }
++   }
++
++   const char* what() {
++       return std::string("!!!!!!! " + _message + " failed\n").c_str();
++   }
++};
++
++
++jint throwAparapiJNIRuntimeException( JNIEnv *env, std::string message );
++
++jint throwAparapiJNIRuntimeException( JNIEnv *env, const char *message );
++
++#endif // JNI_EXCEPTIONS_H
+diff --git a/src/cpp/runKernel/Aparapi.cpp b/src/cpp/runKernel/Aparapi.cpp
+index 73d5bc1..b0ba571 100644
+--- a/src/cpp/runKernel/Aparapi.cpp
++++ b/src/cpp/runKernel/Aparapi.cpp
+@@ -1125,10 +1125,10 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
+       targetWorkGroupSize *= range.localDims[i];
+    }
+    
+-   if (targetWorkGroupSize > maxKernelWorkGroupSize) {
+-      throw JNIException("Kernel overall local size: " + std::to_string(targetWorkGroupSize) + 
+-                        " exceeds maximum kernel allowed local size of: " + std::to_string(maxKernelWorkGroupSize));
+-   }
++//if (targetWorkGroupSize > maxKernelWorkGroupSize) {
++ //     throw JNIException("Kernel overall local size: " + std::to_string(targetWorkGroupSize) + 
++  //                      " exceeds maximum kernel allowed local size of: " + std::to_string(maxKernelWorkGroupSize));
++  // }
+ 
+    cl_int status = CL_SUCCESS;
+    for (int passid=0; passid < passes; passid++) {

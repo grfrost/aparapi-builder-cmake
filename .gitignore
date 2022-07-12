@@ -1,7 +1,7 @@
 build/
 cmake-build-debug/
-syncleus/aparapi/
-syncleus/aparapi-native/
-syncleus/aparapi-jni/
-syncleus/aparapi-examples/
+aparapi/
+aparapi-native/
+aparapi-jni/
+aparapi-examples/
 

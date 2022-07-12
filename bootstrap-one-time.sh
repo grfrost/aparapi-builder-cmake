@@ -1,14 +1,23 @@
-cd syncleus
-git clone https://github.com/Syncleus/aparapi.git
-git clone https://github.com/Syncleus/aparapi-jni.git
-git clone https://github.com/Syncleus/aparapi-native.git
-git clone https://github.com/Syncleus/aparapi-examples.git
-cp NativeLoader.java.patched aparapi-jni/src/main/java/com/aparapi/natives/NativeLoader.java
-cp JNIExceptions.h.patched aparapi-native/src/cpp/JNIExceptions.h
-cp Aparapi.cpp.patched aparapi-native/src/cpp/runKernel/Aparapi.cpp
-cd .. 
 
-mkdir build
+for repo in aparapi aparapi-jni aparapi-native aparapi-examples; do 
+   if [ -d ${repo} ]; then 
+      echo ${repo} exists
+   else
+      git clone https://github.com/Syncleus/${repo}.git ${repo}
+      cd ${repo}
+      git checkout . 
+      cd ..
+   fi
+   if [ -f patches/${repo}.patch ]; then 
+      cd ${repo} 
+      git apply ../patches/${repo}.patch 
+   else
+      echo no patch for ${repo}
+   fi
+done 
+
+rmdir -rf build 
+mkdir -p build
 cd build
 cmake .. 
 cd ..
