@@ -1,3 +1,15 @@
+diff --git a/src/cpp/Common.h b/src/cpp/Common.h
+index bbbd303..db930b8 100644
+--- a/src/cpp/Common.h
++++ b/src/cpp/Common.h
+@@ -68,6 +68,7 @@
+ #include <unistd.h>
+ #endif
+ 
++#define CL_TARGET_OPENCL_VERSION 200
+ #ifndef __APPLE__
+ #include <CL/cl.h>
+ #else
 diff --git a/src/cpp/JNIExceptions.h b/src/cpp/JNIExceptions.h
 index bcb44a0..e59cdf0 100644
 --- a/src/cpp/JNIExceptions.h
