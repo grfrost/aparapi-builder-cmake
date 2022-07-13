@@ -80,6 +80,7 @@ file(GLOB_RECURSE CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/*.cpp")
 list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/classtoolstest.cpp")
 list(REMOVE_ITEM CPP_SRC "${SYNCLEUS}/aparapi-native/src/cpp/cltest.cpp")
 
+set(LIB_APARAPI libaparapi_${ARCH}.${LIBSUFFIX})
 
 add_custom_target(javac 
    COMMAND mkdir -p ${GENERATED_INCLUDE}
@@ -94,29 +95,9 @@ add_custom_target(javac
    ${JAVA_APARAPI_SRC}
 )
 
-add_custom_target(life 
-   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.life.Main
-   DEPENDS javac aparapi_${ARCH} jar
-)
-
-add_custom_target(mandel 
-   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.mandel.Main
-   DEPENDS javac aparapi_${ARCH} jar
-)
-
-add_custom_target(squares 
-   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.squares.Main
-   DEPENDS javac aparapi_${ARCH} jar
-   )
-
-add_custom_target(info 
-   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.info.Main
-   DEPENDS javac aparapi_${ARCH} jar
-   )
-
 add_custom_target(jar
    COMMAND mkdir -p ${CLASSES}/${PLAT}
-   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/libaparapi_${ARCH}.${LIBSUFFIX}  ${CLASSES}/${PLAT}
+   COMMAND cp  ${CMAKE_CURRENT_BINARY_DIR}/${LIB_APARAPI}  ${CLASSES}/${PLAT}/${LIB_APARAPI}
    COMMAND ${JAVA_HOME}/bin/jar
    --create 
    --file ${APARAPI_JAR}
@@ -126,8 +107,29 @@ add_custom_target(jar
    DEPENDS javac aparapi_${ARCH}
 )
 
+
+add_custom_target(life 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.life.Main
+   DEPENDS jar
+)
+
+add_custom_target(mandel 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.mandel.Main
+   DEPENDS jar
+)
+
+add_custom_target(squares 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.squares.Main
+   DEPENDS jar
+   )
+
+add_custom_target(info 
+   COMMAND ${JAVA_HOME}/bin/java -classpath ${APARAPI_JAR}:${BCEL_JAR} com.aparapi.examples.info.Main
+   DEPENDS jar 
+   )
+
 add_custom_target(squeaky
-   COMMAND rm -rf ${APARAPI_JAR} ${CLASSSES} ${GENERATED_INCLUDE}
+   COMMAND rm -rf ${APARAPI_JAR} ${CLASSES} ${GENERATED_INCLUDE} ${LIB_APARAPI} cltest
 )
 
 include_directories(
@@ -143,4 +145,10 @@ add_library(aparapi_${ARCH} SHARED
    ${CPP_SRC}
 )
 
+add_executable(cltest 
+   ${SYNCLEUS}/aparapi-native/src/cpp/cltest.cpp
+)
+
+
 target_link_libraries(aparapi_${ARCH} ${JNI_LIBRARIES} ${OpenCL_FRAMEWORK})
+target_link_libraries(cltest  ${OpenCL_FRAMEWORK})
