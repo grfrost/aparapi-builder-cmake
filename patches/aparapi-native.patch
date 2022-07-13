@@ -1,3 +1,18 @@
+diff --git a/src/cpp/CLException.h b/src/cpp/CLException.h
+index 73b113d..4795f57 100644
+--- a/src/cpp/CLException.h
++++ b/src/cpp/CLException.h
+@@ -63,7 +63,9 @@ public:
+    }
+ 
+    const char* what() {
+-       return std::string("!!!!!!! " + _message + " failed " + CLHelper::errString(status()) + " \n").c_str();
++      static char BUF[1024];
++      ::strcpy(BUF, std::string("!!!!!!! " + _message + " failed " + CLHelper::errString(status()) + " \n").c_str());
++      return (const char *)BUF;
+    }
+ 
+    static void checkCLError(cl_int status, std::string error) {
 diff --git a/src/cpp/Common.h b/src/cpp/Common.h
 index bbbd303..f304803 100644
 --- a/src/cpp/Common.h
@@ -35,10 +50,10 @@ index 9df45bd..4bd9b51 100644
      exClass = env->FindClass( className );
      if (exClass == NULL) {
 diff --git a/src/cpp/JNIExceptions.h b/src/cpp/JNIExceptions.h
-index bcb44a0..e59cdf0 100644
+index bcb44a0..f5411db 100644
 --- a/src/cpp/JNIExceptions.h
 +++ b/src/cpp/JNIExceptions.h
-@@ -1,68 +1,68 @@
+@@ -1,68 +1,70 @@
 -/**
 - * Copyright (c) 2016 - 2018 Syncleus, Inc.
 - *
@@ -165,7 +180,9 @@ index bcb44a0..e59cdf0 100644
 +   }
 +
 +   const char* what() {
-+       return std::string("!!!!!!! " + _message + " failed\n").c_str();
++       static char BUF[1024];
++       ::strcpy(BUF, std::string("!!!!!!! " + _message + " failed\n").c_str());
++       return (const char *)BUF;
 +   }
 +};
 +
@@ -176,9 +193,18 @@ index bcb44a0..e59cdf0 100644
 +
 +#endif // JNI_EXCEPTIONS_H
 diff --git a/src/cpp/classtools.cpp b/src/cpp/classtools.cpp
-index 305b377..192336c 100644
+index 305b377..7f79c35 100644
 --- a/src/cpp/classtools.cpp
 +++ b/src/cpp/classtools.cpp
+@@ -71,7 +71,7 @@ ByteBuffer::ByteBuffer(byte_t *_bytes, size_t _len)
+       memcpy((void*)bytes, (void*)_bytes, len);
+    }
+ ByteBuffer::~ByteBuffer(){
+-   delete bytes;
++   delete [] bytes;
+ }
+ byte_t *ByteBuffer::getBytes(){
+    return(bytes);
 @@ -367,7 +367,7 @@ AttributeInfo::AttributeInfo(ByteBuffer *_byteBuffer, ConstantPoolEntry **_const
        attribute_type  = LocalVariableTable;
     }
@@ -189,7 +215,7 @@ index 305b377..192336c 100644
  }
  u2_t AttributeInfo::getAttributeNameIndex(){
 diff --git a/src/cpp/cltest.cpp b/src/cpp/cltest.cpp
-index 1072732..e202d92 100644
+index 1072732..a9f92d2 100644
 --- a/src/cpp/cltest.cpp
 +++ b/src/cpp/cltest.cpp
 @@ -26,7 +26,7 @@
@@ -222,7 +248,7 @@ index 1072732..e202d92 100644
                 fprintf(stderr, "\n");
  
                 cl_uint maxComputeUnits;
-@@ -183,12 +187,12 @@ int main(int argc, char **argv){
+@@ -183,24 +187,36 @@ int main(int argc, char **argv){
                 size_t *maxWorkItemSizes = new size_t[maxWorkItemDimensions];
                 status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_ITEM_SIZES,  sizeof(size_t)*maxWorkItemDimensions, maxWorkItemSizes, NULL);
                 for (unsigned dimIdx=0; dimIdx<maxWorkItemDimensions; dimIdx++){
@@ -237,6 +263,30 @@ index 1072732..e202d92 100644
  
                 cl_ulong maxMemAllocSize;
                 status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_MEM_ALLOC_SIZE,  sizeof(maxMemAllocSize), &maxMemAllocSize, NULL);
++#ifdef __APPLE__
++               fprintf(stderr, "         CL_DEVICE_MAX_MEM_ALLOC_SIZE....... %llu\n", maxMemAllocSize);
++#else
+                fprintf(stderr, "         CL_DEVICE_MAX_MEM_ALLOC_SIZE....... %lu\n", maxMemAllocSize);
++#endif
+ 
+                cl_ulong globalMemSize;
+                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_GLOBAL_MEM_SIZE,  sizeof(globalMemSize), &globalMemSize, NULL);
++#ifdef __APPLE__
++               fprintf(stderr, "         CL_DEVICE_GLOBAL_MEM_SIZE.......... %llu\n", globalMemSize);
++#else
+                fprintf(stderr, "         CL_DEVICE_GLOBAL_MEM_SIZE.......... %lu\n", globalMemSize);
++#endif
+ 
+                cl_ulong localMemSize;
+                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_LOCAL_MEM_SIZE,  sizeof(localMemSize), &localMemSize, NULL);
++#ifdef __APPLE__
++               fprintf(stderr, "         CL_DEVICE_LOCAL_MEM_SIZE........... %llu\n", localMemSize);
++#else
+                fprintf(stderr, "         CL_DEVICE_LOCAL_MEM_SIZE........... %lu\n", localMemSize);
++#endif
+ 
+ 
+ 
 diff --git a/src/cpp/invoke/OpenCLJNI.cpp b/src/cpp/invoke/OpenCLJNI.cpp
 index bee85a6..fe6ae26 100644
 --- a/src/cpp/invoke/OpenCLJNI.cpp
