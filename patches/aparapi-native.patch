@@ -1,15 +1,39 @@
 diff --git a/src/cpp/Common.h b/src/cpp/Common.h
-index bbbd303..db930b8 100644
+index bbbd303..f304803 100644
 --- a/src/cpp/Common.h
 +++ b/src/cpp/Common.h
-@@ -68,6 +68,7 @@
+@@ -68,6 +68,9 @@
  #include <unistd.h>
  #endif
  
++#define CL_USE_DEPRECATED_OPENCL_1_1_APIS
 +#define CL_TARGET_OPENCL_VERSION 200
++
  #ifndef __APPLE__
  #include <CL/cl.h>
  #else
+diff --git a/src/cpp/JNIExceptions.cpp b/src/cpp/JNIExceptions.cpp
+index 9df45bd..4bd9b51 100644
+--- a/src/cpp/JNIExceptions.cpp
++++ b/src/cpp/JNIExceptions.cpp
+@@ -3,7 +3,7 @@
+ jint throwNoClassDefError( JNIEnv *env, char *message )
+ {
+     jclass exClass;
+-    char *className = "java/lang/NoClassDefFoundError";
++    char *className = (char*)"java/lang/NoClassDefFoundError";
+ 
+     exClass = env->FindClass( className);
+     if (exClass == NULL) {
+@@ -21,7 +21,7 @@ jint throwAparapiJNIRuntimeException( JNIEnv *env, std::string message ) {
+ jint throwAparapiJNIRuntimeException( JNIEnv *env, const char *message )
+ {
+     jclass exClass;
+-    char *className = "com/aparapi/exception/AparapiJNIException";
++    char *className = (char*)"com/aparapi/exception/AparapiJNIException";
+ 
+     exClass = env->FindClass( className );
+     if (exClass == NULL) {
 diff --git a/src/cpp/JNIExceptions.h b/src/cpp/JNIExceptions.h
 index bcb44a0..e59cdf0 100644
 --- a/src/cpp/JNIExceptions.h
@@ -151,6 +175,19 @@ index bcb44a0..e59cdf0 100644
 +jint throwAparapiJNIRuntimeException( JNIEnv *env, const char *message );
 +
 +#endif // JNI_EXCEPTIONS_H
+diff --git a/src/cpp/classtools.cpp b/src/cpp/classtools.cpp
+index 305b377..192336c 100644
+--- a/src/cpp/classtools.cpp
++++ b/src/cpp/classtools.cpp
+@@ -367,7 +367,7 @@ AttributeInfo::AttributeInfo(ByteBuffer *_byteBuffer, ConstantPoolEntry **_const
+       attribute_type  = LocalVariableTable;
+    }
+ #ifdef SHOW
+-   fprintf(stdout, " }] ", attributeName->getUTF8Bytes());
++   fprintf(stdout, " }] \"%s\"\n", (char*)attributeName->getUTF8Bytes());
+ #endif
+ }
+ u2_t AttributeInfo::getAttributeNameIndex(){
 diff --git a/src/cpp/cltest.cpp b/src/cpp/cltest.cpp
 index 1072732..e202d92 100644
 --- a/src/cpp/cltest.cpp
@@ -200,11 +237,43 @@ index 1072732..e202d92 100644
  
                 cl_ulong maxMemAllocSize;
                 status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_MEM_ALLOC_SIZE,  sizeof(maxMemAllocSize), &maxMemAllocSize, NULL);
+diff --git a/src/cpp/invoke/OpenCLJNI.cpp b/src/cpp/invoke/OpenCLJNI.cpp
+index bee85a6..fe6ae26 100644
+--- a/src/cpp/invoke/OpenCLJNI.cpp
++++ b/src/cpp/invoke/OpenCLJNI.cpp
+@@ -139,7 +139,10 @@ JNI_JAVA(jobject, OpenCLJNI, createProgram)
+       cl_command_queue queue = NULL;
+       if(status == CL_SUCCESS) {
+          cl_command_queue_properties queue_props = CL_QUEUE_PROFILING_ENABLE;
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+          queue = clCreateCommandQueue(context, deviceId, queue_props, &status);
++#pragma GCC diagnostic pop
+       }else{
+          fprintf(stderr, "queue creation seems to have failed\n");
+ 
+@@ -441,7 +444,7 @@ JNI_JAVA(void, OpenCLJNI, invoke)
+         profileInfoArr[i] = new ProfileInfo();
+         //fprintf(stdout, "allocated a new ProfileInfo for %d\n", i);
+         int type = (i>(writes+1))?2:((i>writes)?1:0);
+-        profile(profileInfoArr[i], &events[i], type, "unknown", 0L);
++        profile(profileInfoArr[i], &events[i], type, (char*)"unknown", 0L);
+         //fprintf(stdout, "type = %d\n", type);
+         clReleaseEvent(events[i]);
+       }
 diff --git a/src/cpp/runKernel/Aparapi.cpp b/src/cpp/runKernel/Aparapi.cpp
-index 73d5bc1..b0ba571 100644
+index 73d5bc1..82a05cd 100644
 --- a/src/cpp/runKernel/Aparapi.cpp
 +++ b/src/cpp/runKernel/Aparapi.cpp
-@@ -1125,10 +1125,10 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
+@@ -52,6 +52,7 @@
+    */
+ 
+ #define APARAPI_SOURCE
++#define CL_USE_DEPRECATED_OPENCL_1_1_APIS
+ 
+ //this is a workaround for windows machines since <windows.h> defines min/max that break code.
+ #define NOMINMAX
+@@ -1125,10 +1126,10 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
        targetWorkGroupSize *= range.localDims[i];
     }
     
@@ -219,3 +288,16 @@ index 73d5bc1..b0ba571 100644
  
     cl_int status = CL_SUCCESS;
     for (int passid=0; passid < passes; passid++) {
+@@ -1566,9 +1567,12 @@ JNI_JAVA(jlong, KernelRunnerJNI, buildProgramJNI)
+             queue_props |= CL_QUEUE_PROFILING_ENABLE;
+          }
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+          jniContext->commandQueue = clCreateCommandQueue(jniContext->context, (cl_device_id)jniContext->deviceId,
+                queue_props,
+                &status);
++#pragma GCC diagnostic pop
+          if(status != CL_SUCCESS) throw CLException(status,"clCreateCommandQueue()");
+ 
+          commandQueueList.add(jniContext->commandQueue, __LINE__, __FILE__);

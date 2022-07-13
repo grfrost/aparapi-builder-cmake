@@ -48,6 +48,7 @@ if (UNIX AND NOT APPLE)
    set(PLAT linux)
 endif ()
 
+
 message("JAVA_HOME=${JAVA_HOME}")
 message("JNI_SUBDIR=${JNI_SUBDIR}")
 message("LIBSUFFIX=${LIBSUFFIX}")
@@ -58,7 +59,8 @@ find_package(OpenCL REQUIRED)
 include_directories(${OPENCL_INCLUDE_DIR})
 
 set(CMAKE_CXX_STANDARD 14)
-set(CXXFLAGS "-g")
+set(CXXFLAGS "-g -Wno-deprecate-declarations")
+set(CFLAGS "-g -Wno-deprecate-declarations")
 
 set(SYNCLEUS "${CMAKE_CURRENT_SOURCE_DIR}")
 set(CLASSES "${CMAKE_CURRENT_BINARY_DIR}/classes")
