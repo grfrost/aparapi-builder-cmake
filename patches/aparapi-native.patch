@@ -139,6 +139,55 @@ index bcb44a0..e59cdf0 100644
 +jint throwAparapiJNIRuntimeException( JNIEnv *env, const char *message );
 +
 +#endif // JNI_EXCEPTIONS_H
+diff --git a/src/cpp/cltest.cpp b/src/cpp/cltest.cpp
+index 1072732..e202d92 100644
+--- a/src/cpp/cltest.cpp
++++ b/src/cpp/cltest.cpp
+@@ -26,7 +26,7 @@
+ #ifndef _WIN32
+ #include <unistd.h>
+ #endif
+-
++#define CL_TARGET_OPENCL_VERSION 200
+ #ifndef __APPLE__
+ #include <CL/cl.h>
+ #else
+@@ -119,7 +119,7 @@ int main(int argc, char **argv){
+       fprintf(stderr, "clGetPlatformIDs(0,NULL,&platformc) failed!\n%s\n", errString(status));
+       exit(1);
+    }
+-   fprintf(stderr, "clGetPlatformIDs(0,NULL,&platformc) OK!\n", errString(status));
++   fprintf(stderr, "clGetPlatformIDs(0,NULL,&platformc) OK!\n");
+    fprintf(stderr, "There %s %d platform%s\n", ((platformc==1)?"is":"are"), platformc, ((platformc==1)?"":"s"));
+    cl_platform_id* platformIds = new cl_platform_id[platformc];
+    status = clGetPlatformIDs(platformc, platformIds, NULL);
+@@ -169,7 +169,11 @@ int main(int argc, char **argv){
+                   deviceType &= ~CL_DEVICE_TYPE_ACCELERATOR;
+                   fprintf(stderr, "Accelerator ");
+                }
++#ifdef __APPLE__
+                fprintf(stderr, "(0x%llx) ", deviceType);
++#else
++               fprintf(stderr, "(0x%lx) ", deviceType);
++#endif
+                fprintf(stderr, "\n");
+ 
+                cl_uint maxComputeUnits;
+@@ -183,12 +187,12 @@ int main(int argc, char **argv){
+                size_t *maxWorkItemSizes = new size_t[maxWorkItemDimensions];
+                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_ITEM_SIZES,  sizeof(size_t)*maxWorkItemDimensions, maxWorkItemSizes, NULL);
+                for (unsigned dimIdx=0; dimIdx<maxWorkItemDimensions; dimIdx++){
+-                  fprintf(stderr, "             dim[%d] = %d\n", dimIdx, maxWorkItemSizes[dimIdx]);
++                  fprintf(stderr, "             dim[%d] = %lu\n", dimIdx, maxWorkItemSizes[dimIdx]);
+                }
+ 
+                size_t maxWorkGroupSize;
+                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_WORK_GROUP_SIZE,  sizeof(maxWorkGroupSize), &maxWorkGroupSize, NULL);
+-               fprintf(stderr, "         CL_DEVICE_MAX_WORK_GROUP_SIZE...... %u\n", maxWorkGroupSize);
++               fprintf(stderr, "         CL_DEVICE_MAX_WORK_GROUP_SIZE...... %lu\n", maxWorkGroupSize);
+ 
+                cl_ulong maxMemAllocSize;
+                status = clGetDeviceInfo(deviceIds[deviceIdx], CL_DEVICE_MAX_MEM_ALLOC_SIZE,  sizeof(maxMemAllocSize), &maxMemAllocSize, NULL);
 diff --git a/src/cpp/runKernel/Aparapi.cpp b/src/cpp/runKernel/Aparapi.cpp
 index 73d5bc1..b0ba571 100644
 --- a/src/cpp/runKernel/Aparapi.cpp
