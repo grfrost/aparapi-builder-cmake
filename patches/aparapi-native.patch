@@ -312,7 +312,7 @@ index bee85a6..fe6ae26 100644
          clReleaseEvent(events[i]);
        }
 diff --git a/src/cpp/runKernel/Aparapi.cpp b/src/cpp/runKernel/Aparapi.cpp
-index 73d5bc1..82a05cd 100644
+index 73d5bc1..0f25292 100644
 --- a/src/cpp/runKernel/Aparapi.cpp
 +++ b/src/cpp/runKernel/Aparapi.cpp
 @@ -52,6 +52,7 @@
@@ -323,6 +323,68 @@ index 73d5bc1..82a05cd 100644
  
  //this is a workaround for windows machines since <windows.h> defines min/max that break code.
  #define NOMINMAX
+@@ -87,12 +88,12 @@ static const int CANCEL_STATUS_TRUE = 1;
+  * the CL_VERSION_1_2 ifdef.
+  */
+ int enqueueMarker(cl_command_queue commandQueue, cl_event* firstEvent) {
+-//#ifdef CL_VERSION_1_2
+-//   return clEnqueueMarkerWithWaitList(commandQueue, 0, NULL, firstEvent);
+-//#else
++#ifdef CL_VERSION_1_2
++   return clEnqueueMarkerWithWaitList(commandQueue, 0, NULL, firstEvent);
++#else
+    // this was deprecated in 1.1 make sure we use -DCL_USE_DEPRECATED_OPENCL_1_1_APIS
+    return clEnqueueMarker(commandQueue, firstEvent);
+-//#endif
++#endif
+ }
+ 
+ /**
+@@ -858,7 +859,7 @@ JNI_JAVA(jlong, KernelRunnerJNI, getKernelMinimumPrivateMemSizeInUsePerWorkItemJ
+       int length = queryKernelWorkGroupInfo(jEnv, jniContext, CL_KERNEL_PRIVATE_MEM_SIZE, &maxPrivateMemSize);
+       if (length != 1) {
+          throwAparapiJNIRuntimeException(jEnv, "getKernelMinimumPrivateMemSizeInUsePerWorkItemJNI() invalid length" + std::to_string(length));
+-         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + length);
++         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + std::to_string(length));
+       }
+ 
+       return (jlong)maxPrivateMemSize;	
+@@ -886,7 +887,7 @@ JNI_JAVA(jlong, KernelRunnerJNI, getKernelLocalMemSizeInUseJNI)
+       int length = queryKernelWorkGroupInfo(jEnv, jniContext, CL_KERNEL_LOCAL_MEM_SIZE, &maxLocalMemSize);
+       if (length != 1) {
+          throwAparapiJNIRuntimeException(jEnv, "getKernelLocalMemSizeInUseJNI() invalid length" + std::to_string(length));
+-         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + length);
++         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + std::to_string(length));
+       }
+       
+       return (jlong)maxLocalMemSize;
+@@ -914,7 +915,7 @@ JNI_JAVA(jint, KernelRunnerJNI, getKernelPreferredWorkGroupSizeMultipleJNI)
+       int length = queryKernelWorkGroupInfo(jEnv, jniContext, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, preferredWorkGroupSize);
+       if (length != 1) {
+          throwAparapiJNIRuntimeException(jEnv, "getKernelPreferredWorkGroupSizeMultipleJNI() invalid length" + std::to_string(length));
+-         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + length);
++         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + std::to_string(length));
+       }
+    
+       return (jint)preferredWorkGroupSize[0];
+@@ -942,7 +943,7 @@ JNI_JAVA(jint, KernelRunnerJNI, getKernelMaxWorkGroupSizeJNI)
+       int length = queryKernelWorkGroupInfo(jEnv, jniContext, CL_KERNEL_WORK_GROUP_SIZE, maxWorkGroupSize);
+       if (length != 1) {
+          throwAparapiJNIRuntimeException(jEnv, "getKernelMaxWorkGroupSizeJNI() invalid length" + std::to_string(length));
+-         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + length);
++         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + std::to_string(length));
+       }
+    
+       return (jint)maxWorkGroupSize[0];
+@@ -970,7 +971,7 @@ JNI_JAVA(jintArray, KernelRunnerJNI, getKernelCompileWorkGroupSizeJNI)
+       int length = queryKernelWorkGroupInfo(jEnv, jniContext, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, compileWorkGroupSize);
+       if (length == 0) {
+          throwAparapiJNIRuntimeException(jEnv, "getKernelCompileWorkGroupSizeJNI() invalid length: " + std::to_string(length));
+-         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + length);
++         throw JNIException("queryKernelWorkGroupInfo() invalid length: " + std::to_string(length));
+       } 
+       
+       jintArray jArr = jEnv->NewIntArray(length);
 @@ -1125,10 +1126,10 @@ void enqueueKernel(JNIContext* jniContext, Range& range, int passes, int argPos,
        targetWorkGroupSize *= range.localDims[i];
     }
@@ -351,3 +413,18 @@ index 73d5bc1..82a05cd 100644
           if(status != CL_SUCCESS) throw CLException(status,"clCreateCommandQueue()");
  
           commandQueueList.add(jniContext->commandQueue, __LINE__, __FILE__);
+diff --git a/src/cpp/runKernel/KernelArg.cpp b/src/cpp/runKernel/KernelArg.cpp
+index 154ed84..9516043 100644
+--- a/src/cpp/runKernel/KernelArg.cpp
++++ b/src/cpp/runKernel/KernelArg.cpp
+@@ -91,7 +91,9 @@ const char* KernelArg::getTypeName() {
+    else if(isDouble()) {
+       s += "double";
+    }
+-   return s.c_str();
++   static char BUF[64];
++   ::strcpy(BUF, s.c_str());
++   return (const char *)BUF;
+ }
+ 
+ void KernelArg::getPrimitiveValue(JNIEnv *jenv, jfloat* value) {
