@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/aparapi/internal/model/ClassModel.java b/src/main/java/com/aparapi/internal/model/ClassModel.java
+index 0cfdb135..c88b2717 100644
+--- a/src/main/java/com/aparapi/internal/model/ClassModel.java
++++ b/src/main/java/com/aparapi/internal/model/ClassModel.java
+@@ -361,7 +361,7 @@ public class ClassModel {
+          int lastDollar = fieldName.lastIndexOf('$');
+          String sizeText = fieldName.substring(lastDollar + 1);
+          try {
+-            return new Integer(Integer.parseInt(sizeText));
++            return Integer.parseInt(sizeText);
+          } catch (NumberFormatException e) {
+             throw new ClassParseException(ClassParseException.TYPE.IMPROPERPRIVATENAMEMANGLING, fieldName);
+          }
