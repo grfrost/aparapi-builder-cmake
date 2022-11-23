@@ -1,5 +1,6 @@
 
 for repo in aparapi aparapi-jni aparapi-native aparapi-examples; do 
+   #rm -rf ${repo} # uncomment to force download
    if [ -d ${repo} ]; then 
       echo ${repo} exists so cleaning
       cd ${repo}
