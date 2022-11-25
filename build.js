@@ -51,7 +51,7 @@ const project = {
         },{
             name:"cltest-cpp-run",
             exec: "build/cltest",
-            depends: ["cltest"],
+            depends: ["cltest-cpp-app"],
             args: []
         },{
             name:"aparapi-java-classes",
@@ -75,6 +75,16 @@ const project = {
             name:"mandel-java-run",
             depends: ["aparapi-java-jar"],
             mainclass: "com.aparapi.examples.mandel.Main",
+            classpaths: [
+                "build/aparapi.jar",
+                "thirdparty/bcel-6.5.0.jar"
+            ],
+            jvmOpts: [],
+            args: []
+        },{
+            name:"life-java-run",
+            depends: ["aparapi-java-jar"],
+            mainclass: "com.aparapi.examples.life.Main",
             classpaths: [
                 "build/aparapi.jar",
                 "thirdparty/bcel-6.5.0.jar"
