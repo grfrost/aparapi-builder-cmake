@@ -7,7 +7,7 @@ const project = {
         standard: "17"
     },
     java: {
-        out: "build/classes",
+        classes: "build/classes",
         classpaths: [
             "thirdparty/bcel-6.5.0.jar"
         ],
@@ -64,13 +64,24 @@ const project = {
             classpaths: [
                 "thirdparty/bcel-6.5.0.jar"
             ],
-            headers: "build/include"
+            headers: "build/include",
+            creates: [
+                "build/include/opencl_jni_OpenCL.h",
+                "build/include/opencl_jni_OpenCL_Platform_Device.h",
+                "build/include/opencl_jni_OpenCL_Platform.h",
+                "build/include/opencl_jni_OpenCL_Platform_Program_Kernel.h",
+                "build/include/org_grfstuff_Barista.h",
+                "build/included/org_grfstuff_ClassInfo.h",
+                "build/include/org_grfstuff_ClassInfo_MethodInfo.h",
+                "build/include/org_grfstuff_ClassInfo_MethodInfo_CodeAttribute.h",
+                "build/include/org_grfstuff_ClassInfo_FieldInfo.h"
+            ]
         },{
             name:"aparapi-java-jar",
             depends: ["aparapi-java-classes", "aparapi-cpp-lib"],
             dirs: ["build/classes"],
             cp: {from: "build/libaparapi_aarch64.dylib", to: "build/classes/osx"},
-            file: "build/aparapi.jar"
+            creates: "build/aparapi.jar"
         },{
             name:"mandel-java-run",
             depends: ["aparapi-java-jar"],
