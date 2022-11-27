@@ -19,6 +19,7 @@ const project = {
          {
             name:"aparapi-cpp-lib",
             depends: ["aparapi-java-classes"],
+            creates: "build/libaparapi_aarch64.dylib",
             sources: [
                 "aparapi-native/src/cpp/classtoolstest.cpp",
                 "aparapi-native/src/cpp/JNIExceptions.cpp",
@@ -47,7 +48,8 @@ const project = {
         },{
             name:"cltest-cpp-app",
             sources: "aparapi-native/src/cpp/cltest.cpp",
-            frameworks: ["jni", "opencl"]
+            frameworks: ["jni", "opencl"],
+            creates: "build/cltest"
         },{
             name:"cltest-cpp-run",
             exec: "build/cltest",
@@ -80,7 +82,8 @@ const project = {
             name:"aparapi-java-jar",
             depends: ["aparapi-java-classes", "aparapi-cpp-lib"],
             dirs: ["build/classes"],
-            cp: {from: "build/libaparapi_aarch64.dylib", to: "build/classes/osx"},
+            mkdirs: "build/classes/osx",
+            cp: {from: "build/libaparapi_aarch64.dylib", to: "build/classes/osx/libaparapi_aarch64.dylib"},
             creates: "build/aparapi.jar"
         },{
             name:"mandel-java-run",
